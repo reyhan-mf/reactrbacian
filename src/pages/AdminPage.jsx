@@ -1,10 +1,23 @@
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Context from "../context/context";
-
+import { fetchProducts } from "../services/ProductServices"; // Import the service function
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await fetchProducts(); 
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -24,49 +37,27 @@ function AdminPage() {
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>Google Pixel 6 Pro</td>
-            <td>
-              <ul class="attributes-list">
-                <li>
-                  <strong>color:</strong> Cloudy White
-                </li>
-                <li>
-                  <strong>capacity:</strong> 128 GB
-                </li>
-              </ul>
-            </td>
-            <td>
-              <button>Edit</button>
-              <button>Delete</button>
-            </td>
-          </tr>
-
-          <tr>
-            <td>7</td>
-            <td>Apple MacBook Pro 16</td>
-            <td>
-              <ul class="attributes-list">
-                <li>
-                  <strong>year:</strong> 2019
-                </li>
-                <li>
-                  <strong>price:</strong> 1849.99
-                </li>
-                <li>
-                  <strong>CPU model:</strong> Intel Core i9
-                </li>
-                <li>
-                  <strong>Hard disk size:</strong> 1 TB
-                </li>
-              </ul>
-            </td>
-            <td>
-              <button>Edit</button>
-              <button>Delete</button>
-            </td>
-          </tr>
+          {products.map((product) => (
+            <tr key={product.id}>
+              <td>{product.id}</td>
+              <td>{product.name}</td>
+              <td>
+                <ul className="attributes-list">
+                  {Object.entries(product.data || {}).map(
+                    ([key, value]) => (
+                      <li key={key}>
+                        <strong>{key}:</strong> {value}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </td>
+              <td>
+                <button>Edit</button>
+                <button>Delete</button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
       <br />
