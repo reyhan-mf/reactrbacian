@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Context from '../context/context';
 
 function LoginPage() {
-  const [selectedRole, setSelectedRole] = useState('admin') 
+  const [selectedRole, setSelectedRole] = useState('') 
   const navigate = useNavigate();
   const { login, authenticated, role } = useContext(Context);
 
@@ -20,7 +20,7 @@ function LoginPage() {
     
     if (selectedRole === 'admin') navigate('/admin');
     else if (selectedRole === 'editor') navigate('/editor');
-    else if (selectedRole === 'viewer') navigate('/viewer'); // Fix: hapus 'guest'
+    else if (selectedRole === 'viewer') navigate('/viewer'); 
     else navigate('/unauthorized');
   };
 
@@ -35,7 +35,11 @@ function LoginPage() {
       )}
       {!authenticated && (
         <>
-          <select value={selectedRole} onChange={e => setSelectedRole(e.target.value)}>
+          <select
+            value={selectedRole}
+            onChange={e => setSelectedRole(e.target.value)}
+          >
+            <option value="" disabled>Select Role</option>
             <option value="admin">Admin</option>
             <option value="editor">Editor</option>
             <option value="viewer">Viewer</option>
