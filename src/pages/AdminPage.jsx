@@ -1,24 +1,45 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Context from "../context/context";
-import { fetchProducts } from "../services/ProductServices"; // Import the service function
+import { fetchProducts, deleteProduct } from "../services/ProductServices"; // Import the service function
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await fetchProducts(); 
-        setProducts(data);
-      } catch (error) {
-        console.error("Error fetching products:", error);
+    const loadData = async () => {
+      const localData = localStorage.getItem("products");
+      if (localData) {
+        setProducts(JSON.parse(localData)); 
+      } else {
+        try {
+          const data = await fetchProducts();
+          setProducts(data);
+          localStorage.setItem("products", JSON.stringify(data)); 
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
       }
     };
-    fetchData();
+    loadData();
   }, []);
 
+  const handleDelete = async (id) => {
+    if (window.confirm(`Are you sure you want to delete product with ID: ${id}?`)) {
+      try {
+        // Simulate deletion locally
+        const updatedProducts = products.filter((product) => product.id !== id);
+        setProducts(updatedProducts);
+        localStorage.setItem("products", JSON.stringify(updatedProducts)); // Update localStorage
+
+        // Optionally call the API to delete the product
+        await deleteProduct(id);
+      } catch (error) {
+        console.error("Error deleting product:", error);
+      }
+    }
+  };
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -54,7 +75,7 @@ function AdminPage() {
               </td>
               <td>
                 <button>Edit</button>
-                <button>Delete</button>
+                <button onClick={() => handleDelete(product.id)}>Delete</button>
               </td>
             </tr>
           ))}
