@@ -22,12 +22,12 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/editor" element={
-            <ProtectedRoute requiredRoles={['admin', 'editor']}>
+            <ProtectedRoute requiredRoles={['editor']}>
               <EditorPage />
             </ProtectedRoute>
           } />
           <Route path="/viewer" element={
-            <ProtectedRoute requiredRoles={['admin', 'editor', 'viewer']}>
+            <ProtectedRoute requiredRoles={['viewer']}>
               <ViewerPage />
             </ProtectedRoute>
           } />
