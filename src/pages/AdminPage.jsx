@@ -147,57 +147,87 @@ function AdminPage() {
         </div>
         <button onClick={handleCreateProduct}>Create Product</button>
       </div>
- {/* Edit Product Modal */}
-      {editingProduct && (
-        <div className="modal">
-          <h2>Edit Product</h2>
-          <div>
-            <label>
-              Name:
-              <input
-                type="text"
-                value={editingProduct.name}
-                onChange={(e) =>
-                  setEditingProduct({ ...editingProduct, name: e.target.value })
-                }
-              />
-            </label>
-          </div>
-          <div>
-            <h3>Attributes</h3>
-            <ul>
-              {Object.entries(editingProduct.data).map(([key, value]) => (
-                <li key={key}>
-                  <input
-                    type="text"
-                    value={key}
-                    onChange={(e) => {
-                      const newKey = e.target.value;
-                      const { [key]: oldValue, ...rest } = editingProduct.data;
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: { ...rest, [newKey]: oldValue },
-                      });
-                    }}
-                  />
-                  <input
-                    type="text"
-                    value={value}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: { ...editingProduct.data, [key]: e.target.value },
-                      })
-                    }
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-          <button onClick={handleUpdateProduct}>Save Changes</button>
-          <button onClick={() => setEditingProduct(null)}>Cancel</button>
-        </div>
-      )}
+{/* Edit Product Modal */}
+{editingProduct && (
+  <div className="modal">
+    <h2>Edit Product</h2>
+    <div>
+      <label>
+        Name:
+        <input
+          type="text"
+          value={editingProduct.name}
+          onChange={(e) =>
+            setEditingProduct({ ...editingProduct, name: e.target.value })
+          }
+        />
+      </label>
+    </div>
+    <div>
+      <h3>Attributes</h3>
+      <ul>
+        {Object.entries(editingProduct.data || {}).map(([key, value]) => (
+          <li key={key}>
+            <input
+              type="text"
+              value={key}
+              onChange={(e) => {
+                const newKey = e.target.value;
+                const { [key]: oldValue, ...rest } = editingProduct.data;
+                setEditingProduct({
+                  ...editingProduct,
+                  data: { ...rest, [newKey]: oldValue },
+                });
+              }}
+            />
+            <input
+              type="text"
+              value={value}
+              onChange={(e) =>
+                setEditingProduct({
+                  ...editingProduct,
+                  data: { ...editingProduct.data, [key]: e.target.value },
+                })
+              }
+            />
+          </li>
+        ))}
+      </ul>
+      {/* Add New Attribute */}
+      <div>
+        <input
+          type="text"
+          placeholder="New Attribute Key"
+          value={newAttribute.key}
+          onChange={(e) => setNewAttribute({ ...newAttribute, key: e.target.value })}
+        />
+        <input
+          type="text"
+          placeholder="New Attribute Value"
+          value={newAttribute.value}
+          onChange={(e) => setNewAttribute({ ...newAttribute, value: e.target.value })}
+        />
+        <button
+          onClick={() => {
+            if (newAttribute.key && newAttribute.value) {
+              setEditingProduct((prev) => ({
+                ...prev,
+                data: { ...prev.data, [newAttribute.key]: newAttribute.value },
+              }));
+              setNewAttribute({ key: "", value: "" }); // Reset the input fields
+            } else {
+              alert("Both key and value are required to add an attribute.");
+            }
+          }}
+        >
+          Add Attribute
+        </button>
+      </div>
+    </div>
+    <button onClick={handleUpdateProduct}>Save Changes</button>
+    <button onClick={() => setEditingProduct(null)}>Cancel</button>
+  </div>
+)}
       {/* Product Table */}
       <table>
         <thead>
