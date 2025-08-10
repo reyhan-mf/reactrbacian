@@ -1,11 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Context from "../context/context";
-import { fetchProducts, deleteProduct } from "../services/ProductServices"; // Import the service function
+import { fetchProducts, deleteProduct, createProduct } from "../services/ProductServices"; // Import the service function
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [newAttribute, setNewAttribute] = useState({ key: "", value: "" });
+  const [newProduct, setNewProduct] = useState({ name: "", data: {} });
 
   useEffect(() => {
     const loadData = async () => {
@@ -28,18 +30,44 @@ function AdminPage() {
   const handleDelete = async (id) => {
     if (window.confirm(`Are you sure you want to delete product with ID: ${id}?`)) {
       try {
-        // Simulate deletion locally
-        const updatedProducts = products.filter((product) => product.id !== id);
+       const updatedProducts = products.filter((product) => product.id !== id);
         setProducts(updatedProducts);
-        localStorage.setItem("products", JSON.stringify(updatedProducts)); // Update localStorage
+        localStorage.setItem("products", JSON.stringify(updatedProducts));
 
-        // Optionally call the API to delete the product
         await deleteProduct(id);
       } catch (error) {
         console.error("Error deleting product:", error);
       }
     }
   };
+
+  const handleAddAttribute = () => {
+    if (newAttribute.key && newAttribute.value) {
+      setNewProduct((prev) => ({
+        ...prev,
+        data: { ...prev.data, [newAttribute.key]: newAttribute.value },
+      }));
+      setNewAttribute({ key: "", value: "" });
+    }
+  };
+
+  const handleCreateProduct = async () => {
+    if (!newProduct.name) {
+      alert("Product name is required!");
+      return;
+    }
+
+    try {
+      const createdProduct = await createProduct(newProduct);
+      const updatedProducts = [...products, createdProduct];
+      setProducts(updatedProducts);
+      localStorage.setItem("products", JSON.stringify(updatedProducts));
+      setNewProduct({ name: "", data: {} });
+    } catch (error) {
+      console.error("Error creating product:", error);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -48,6 +76,49 @@ function AdminPage() {
   return (
     <div>
       <h1>Welcome, {role}</h1>
+      <button>Refresh Session</button>
+      {/* Create Product Form */}
+      <div>
+        <h2>Create Product</h2>
+        <div>
+          <label>
+            Name:
+            <input
+              type="text"
+              value={newProduct.name}
+              onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+            />
+          </label>
+        </div>
+        <div>
+          <h3>Attributes</h3>
+          <div>
+            <input
+              type="text"
+              placeholder="Key"
+              value={newAttribute.key}
+              onChange={(e) => setNewAttribute({ ...newAttribute, key: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Value"
+              value={newAttribute.value}
+              onChange={(e) => setNewAttribute({ ...newAttribute, value: e.target.value })}
+            />
+            <button onClick={handleAddAttribute}>Add Attribute</button>
+          </div>
+          <ul>
+            {Object.entries(newProduct.data).map(([key, value]) => (
+              <li key={key}>
+                <strong>{key}:</strong> {value}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button onClick={handleCreateProduct}>Create Product</button>
+      </div>
+
+      {/* Product Table */}
       <table>
         <thead>
           <tr>
@@ -63,15 +134,17 @@ function AdminPage() {
               <td>{product.id}</td>
               <td>{product.name}</td>
               <td>
-                <ul className="attributes-list">
-                  {Object.entries(product.data || {}).map(
-                    ([key, value]) => (
+                {product.data ? (
+                  <ul className="attributes-list">
+                    {Object.entries(product.data).map(([key, value]) => (
                       <li key={key}>
                         <strong>{key}:</strong> {value}
                       </li>
-                    )
-                  )}
-                </ul>
+                    ))}
+                  </ul>
+                ) : (
+                  <span>No data</span>
+                )}
               </td>
               <td>
                 <button>Edit</button>
@@ -81,6 +154,7 @@ function AdminPage() {
           ))}
         </tbody>
       </table>
+
       <br />
       <button onClick={handleLogout}>Logout</button>
     </div>
