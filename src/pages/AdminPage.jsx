@@ -16,15 +16,16 @@ function AdminPage() {
   const [newAttribute, setNewAttribute] = useState({ key: "", value: "" });
   const [newProduct, setNewProduct] = useState({ name: "", data: {} });
   const [editingProduct, setEditingProduct] = useState(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
       const localData = getLocalProducts();
-      
+
       try {
         console.log("Loading products from API");
         const apiData = await fetchProducts();
-        
+
         if (localData && localData.length > 0) {
           console.log("Merging with existing local data");
           const mergedData = mergeApiWithLocal(apiData, localData);
@@ -43,18 +44,19 @@ function AdminPage() {
         }
       }
     };
-    
+
     loadData();
   }, []);
 
   const handleDelete = async (id) => {
-    if (window.confirm(`Are you sure you want to delete product with ID: ${id}?`)) {
+    if (
+      window.confirm(`Are you sure you want to delete product with ID: ${id}?`)
+    ) {
       try {
         const updatedProducts = products.filter((product) => product.id !== id);
         setProducts(updatedProducts);
         saveProductsLocally(updatedProducts);
 
-        
         await deleteProduct(id);
       } catch (error) {
         console.error("Error deleting product:", error);
@@ -63,40 +65,35 @@ function AdminPage() {
   };
 
   const mergeApiWithLocal = (apiData, localData) => {
-    // Start with locally created products (not cloned from API)
-    const locallyCreatedProducts = localData.filter(product => !product.isCloned);
-    
-    // Start with locally modified cloned products
-    const locallyModifiedProducts = localData.filter(product => 
-      product.isCloned && (product.isLocallyModified || product.updatedAt)
+    const locallyCreatedProducts = localData.filter(
+      (product) => !product.isCloned
     );
-    
-    // Add fresh API data (marking as cloned)
-    const freshApiProducts = apiData.map(apiProduct => ({
+
+    const locallyModifiedProducts = localData.filter(
+      (product) =>
+        product.isCloned && (product.isLocallyModified || product.updatedAt)
+    );
+
+    const freshApiProducts = apiData.map((apiProduct) => ({
       ...apiProduct,
       isCloned: true,
-      originalApiData: { ...apiProduct }
+      originalApiData: { ...apiProduct },
     }));
-    
-    // Merge: locally created + locally modified + fresh API data
-    // Use a Map to avoid duplicates based on id
+
     const productMap = new Map();
-    
-    // Add fresh API products first
-    freshApiProducts.forEach(product => {
+
+    freshApiProducts.forEach((product) => {
       productMap.set(product.id, product);
     });
-    
-    // Override with locally modified versions (preserving local changes)
-    locallyModifiedProducts.forEach(product => {
+
+    locallyModifiedProducts.forEach((product) => {
       productMap.set(product.id, product);
     });
-    
-    // Add locally created products (these won't conflict with API data)
-    locallyCreatedProducts.forEach(product => {
+
+    locallyCreatedProducts.forEach((product) => {
       productMap.set(product.id, product);
     });
-    
+
     return Array.from(productMap.values());
   };
 
@@ -121,7 +118,12 @@ function AdminPage() {
       const updatedProducts = [...products, createdProduct];
       setProducts(updatedProducts);
       saveProductsLocally(updatedProducts);
+      
+      // Reset form and close modal
       setNewProduct({ name: "", data: {} });
+      setNewAttribute({ key: "", value: "" });
+      setShowCreateModal(false);
+      
       console.log("Product created:", createdProduct);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -129,8 +131,18 @@ function AdminPage() {
     }
   };
 
+  const handleCancelCreate = () => {
+    setNewProduct({ name: "", data: {} });
+    setNewAttribute({ key: "", value: "" });
+    setShowCreateModal(false);
+  };
+
   const handleEdit = (product) => {
     setEditingProduct(product);
+  };
+
+  const handleAddData = (product) => {
+    setNewProduct(product);
   };
 
   const handleUpdateProduct = async () => {
@@ -138,7 +150,7 @@ function AdminPage() {
       alert("Product name is required!");
       return;
     }
-    
+
     try {
       const updatedProductFromService = await updateProduct(editingProduct);
 
@@ -149,10 +161,11 @@ function AdminPage() {
       setProducts(updatedProducts);
       saveProductsLocally(updatedProducts);
       setEditingProduct(null);
-      
-      
+
       if (updatedProductFromService.isLocallyModified) {
-        console.log("Product updated locally (API doesn't support updates for this item)");
+        console.log(
+          "Product updated locally (API doesn't support updates for this item)"
+        );
       } else {
         console.log("Product updated via API");
       }
@@ -166,15 +179,18 @@ function AdminPage() {
     try {
       console.log("Refreshing session - resetting to original API state");
       const freshApiData = await fetchProducts();
-      
-      // Reset to original API state, clearing all local modifications
+
       setProducts(freshApiData);
       saveProductsLocally(freshApiData);
-      
-      console.log("Session refreshed - localStorage reset to original API state");
+
+      console.log(
+        "Session refreshed - localStorage reset to original API state"
+      );
     } catch (error) {
       console.error("Error refreshing session:", error);
-      alert("Failed to refresh session. Please check your internet connection.");
+      alert(
+        "Failed to refresh session. Please check your internet connection."
+      );
     }
   };
 
@@ -187,57 +203,67 @@ function AdminPage() {
     <div>
       <h1>Welcome, {role}</h1>
       <button onClick={handleRefreshSession}>Refresh Session</button>
-      {/* Create Product Form */}
-      <div>
-        <h2>Create Product</h2>
-        <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              value={newProduct.name}
-              onChange={(e) =>
-                setNewProduct({ ...newProduct, name: e.target.value })
-              }
-            />
-          </label>
-        </div>
-
-        <div>
-          <h3>Attributes</h3>
+      <br />
+      <br />
+      <button onClick={() => setShowCreateModal(true)}>Create Product</button>
+      
+      {/* Create Product Modal */}
+      {showCreateModal && (
+        <div className="modal">
           <div>
-            <input
-              type="text"
-              placeholder="Key"
-              value={newAttribute.key}
-              onChange={(e) =>
-                setNewAttribute({ ...newAttribute, key: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="Value"
-              value={newAttribute.value}
-              onChange={(e) =>
-                setNewAttribute({ ...newAttribute, value: e.target.value })
-              }
-            />
-            <button onClick={handleAddAttribute}>Add Attribute</button>
+            <h2>Create Product</h2>
+            <div>
+              <label>
+                Name:
+                <input
+                  type="text"
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                />
+              </label>
+            </div>
+            <div>
+              <h3>Attributes</h3>
+              <div>
+                <input
+                  type="text"
+                  placeholder="Key"
+                  value={newAttribute.key}
+                  onChange={(e) =>
+                    setNewAttribute({ ...newAttribute, key: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Value"
+                  value={newAttribute.value}
+                  onChange={(e) =>
+                    setNewAttribute({ ...newAttribute, value: e.target.value })
+                  }
+                />
+                <button onClick={handleAddAttribute}>Add Attribute</button>
+              </div>
+              <ul>
+                {Object.entries(newProduct.data).map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{key}:</strong> {value}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button onClick={handleCreateProduct}>Create Product</button>
+            <button onClick={handleCancelCreate}>Cancel</button>
           </div>
-          <ul>
-            {Object.entries(newProduct.data).map(([key, value]) => (
-              <li key={key}>
-                <strong>{key}:</strong> {value}
-              </li>
-            ))}
-          </ul>
         </div>
-        <button onClick={handleCreateProduct}>Create Product</button>
-      </div>
+      )}
+
       {/* Edit Product Modal */}
       {editingProduct && (
         <div className="modal">
-          <h2>Edit Product</h2>
+          <div>
+            <h2>Edit Product</h2>
           <div>
             <label>
               Name:
@@ -308,7 +334,7 @@ function AdminPage() {
                         [newAttribute.key]: newAttribute.value,
                       },
                     }));
-                    setNewAttribute({ key: "", value: "" }); 
+                    setNewAttribute({ key: "", value: "" });
                   } else {
                     alert(
                       "Both key and value are required to add an attribute."
@@ -322,6 +348,7 @@ function AdminPage() {
           </div>
           <button onClick={handleUpdateProduct}>Save Changes</button>
           <button onClick={() => setEditingProduct(null)}>Cancel</button>
+          </div>
         </div>
       )}
       {/* Product Table */}
@@ -340,7 +367,7 @@ function AdminPage() {
             <tr key={product.id}>
               <td>{product.id_counter}</td>
               <td>
-                 {product.createdAt
+                {product.createdAt
                   ? `Created At: ${new Date(
                       product.createdAt
                     ).toLocaleDateString()} ${new Date(
