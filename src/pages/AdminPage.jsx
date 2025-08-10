@@ -8,6 +8,7 @@ function AdminPage() {
   const [products, setProducts] = useState([]);
   const [newAttribute, setNewAttribute] = useState({ key: "", value: "" });
   const [newProduct, setNewProduct] = useState({ name: "", data: {} });
+  const [editingProduct, setEditingProduct] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -68,6 +69,24 @@ function AdminPage() {
     }
   };
 
+  const handleEdit = (product) => {
+    setEditingProduct(product);
+  };
+
+  const handleUpdateProduct = () => {
+    if (!editingProduct.name) {
+      alert("Product name is required!");
+      return;
+    }
+
+    const updatedProducts = products.map((product) =>
+      product.id === editingProduct.id ? editingProduct : product
+    );
+    setProducts(updatedProducts);
+    localStorage.setItem("products", JSON.stringify(updatedProducts));
+    setEditingProduct(null); // Close the modal
+  };
+
   const handleRefreshSession = async () => {
     try {
       const data = await fetchProducts();
@@ -100,6 +119,7 @@ function AdminPage() {
             />
           </label>
         </div>
+        
         <div>
           <h3>Attributes</h3>
           <div>
@@ -127,12 +147,63 @@ function AdminPage() {
         </div>
         <button onClick={handleCreateProduct}>Create Product</button>
       </div>
-
+ {/* Edit Product Modal */}
+      {editingProduct && (
+        <div className="modal">
+          <h2>Edit Product</h2>
+          <div>
+            <label>
+              Name:
+              <input
+                type="text"
+                value={editingProduct.name}
+                onChange={(e) =>
+                  setEditingProduct({ ...editingProduct, name: e.target.value })
+                }
+              />
+            </label>
+          </div>
+          <div>
+            <h3>Attributes</h3>
+            <ul>
+              {Object.entries(editingProduct.data).map(([key, value]) => (
+                <li key={key}>
+                  <input
+                    type="text"
+                    value={key}
+                    onChange={(e) => {
+                      const newKey = e.target.value;
+                      const { [key]: oldValue, ...rest } = editingProduct.data;
+                      setEditingProduct({
+                        ...editingProduct,
+                        data: { ...rest, [newKey]: oldValue },
+                      });
+                    }}
+                  />
+                  <input
+                    type="text"
+                    value={value}
+                    onChange={(e) =>
+                      setEditingProduct({
+                        ...editingProduct,
+                        data: { ...editingProduct.data, [key]: e.target.value },
+                      })
+                    }
+                  />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <button onClick={handleUpdateProduct}>Save Changes</button>
+          <button onClick={() => setEditingProduct(null)}>Cancel</button>
+        </div>
+      )}
       {/* Product Table */}
       <table>
         <thead>
           <tr>
             <th>ID</th>
+            <th>Date</th>
             <th>Name</th>
             <th>Attributes</th>
             <th>Actions</th>
@@ -142,6 +213,7 @@ function AdminPage() {
           {products.map((product) => (
             <tr key={product.id}>
               <td>{product.id}</td>
+              <td>{product.createdAt ? new Date(product.createdAt).toLocaleDateString() : "N/A"}</td>
               <td>{product.name}</td>
               <td>
                 {product.data ? (
@@ -157,13 +229,15 @@ function AdminPage() {
                 )}
               </td>
               <td>
-                <button>Edit</button>
+                <button onClick={() => handleEdit(product)}>Edit</button>
                 <button onClick={() => handleDelete(product.id)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+
 
       <br />
       <button onClick={handleLogout}>Logout</button>
