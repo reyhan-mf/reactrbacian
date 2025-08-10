@@ -6,7 +6,7 @@ export async function fetchProducts() {
   const products = await response.json();
   return products.map((product) => ({
     ...product,
-    id: isNaN(Number(product.id)) ? fallbackIdCounter++ : Number(product.id),
+    id_counter: isNaN(Number(product.id)) ? fallbackIdCounter++ : Number(product.id), // Add id_counter
   }));
 }
 
@@ -20,11 +20,27 @@ export async function createProduct(product) {
     body: JSON.stringify(product),
   });
   if (!response.ok) throw new Error("Failed to create product");
-  const products = await response.json();
-  console.log("🚀 ~ createProduct ~ response.json():", products);
+  const createdProduct = await response.json();
   return {
-    ...products,
-    id: isNaN(Number(products.id)) ? fallbackIdCounter++ : Number(products.id),
+    ...createdProduct,
+    id_counter: isNaN(Number(createdProduct.id)) ? fallbackIdCounter++ : Number(createdProduct.id), // Add id_counter
+  };
+}
+
+// update Product
+export async function updateProduct(product) {
+  const response = await fetch(`https://api.restful-api.dev/objects/${product.id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(product),
+  });
+  if (!response.ok) throw new Error("Failed to update product");
+  const updatedProduct = await response.json();
+  return {
+    ...updatedProduct,
+    id_counter: product.id_counter, 
   };
 }
 
