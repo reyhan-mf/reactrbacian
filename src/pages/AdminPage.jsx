@@ -68,6 +68,16 @@ function AdminPage() {
     }
   };
 
+  const handleRefreshSession = async () => {
+    try {
+      const data = await fetchProducts();
+        setProducts(data);
+        localStorage.setItem("products", JSON.stringify(data));
+    } catch (error) {
+      console.error("Error refreshing session:", error);
+    }
+  };
+
   const handleLogout = () => {
     logout();
     navigate("/");
@@ -76,7 +86,7 @@ function AdminPage() {
   return (
     <div>
       <h1>Welcome, {role}</h1>
-      <button>Refresh Session</button>
+      <button onClick={handleRefreshSession}>Refresh Session</button>
       {/* Create Product Form */}
       <div>
         <h2>Create Product</h2>
