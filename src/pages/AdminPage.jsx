@@ -1,5 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import Table from "react-bootstrap/Table";
 import { useNavigate } from "react-router-dom";
 import CreateIcon from "../components/Icons/CreateIcon";
 import TrashIcon from "../components/Icons/DeleteIcon";
@@ -9,7 +8,8 @@ import DeleteModal from "../components/Modals/DeleteModal";
 import EditModal from "../components/Modals/EditModal";
 import CollapsibleNavbar from "../components/NavBar";
 import Context from "../context/context";
-
+import CustomTable from "../components/Tables";
+import ErrorBoundary from "../components/ErrorBoundary";
 import {
   createProduct,
   deleteProduct,
@@ -222,24 +222,7 @@ function AdminPage() {
 
   return (
     <div>
-      <CollapsibleNavbar role={role} logout={handleLogout} />
-      <br />
-      <h1>Welcome, {role}</h1>
-      <button onClick={handleRefreshSession}>Refresh Session</button>
-      <br />
-      <br />
-
-<div className="table-header-actions">
-        <h2 className="table-title">Products</h2>
-        <button
-          className="icon-btn icon-btn-create"
-          onClick={() => setShowCreateModal(true)}
-          title="Create Product"
-        >
-          <CreateIcon />
-        </button>
-      </div>
-
+      {/* Modals */}
       {/* Create Product Modal */}
       <CreateModal
         showCreateModal={showCreateModal}
@@ -266,6 +249,7 @@ function AdminPage() {
         }}
       />
       {/* END Edit Product Modal */}
+      {/* Modals End */}
 
       <DeleteModal
         showDeleteModal={showDeleteModal}
@@ -274,74 +258,30 @@ function AdminPage() {
         productToDelete={productToDelete}
       />
 
+      <CollapsibleNavbar role={role} logout={handleLogout} />
+      <br />
+      <br />
+
+      <h1>
+        Welcome, <span style={{ fontWeight: "bold" }}>{role}</span>
+      </h1>
+      {/* <button onClick={handleRefreshSession}>Refresh Session</button> */}
+
+      <div className="table-header-actions">
+        <h2 className="table-title">Products</h2>
+        <button
+          className="icon-btn icon-btn-create"
+          onClick={() => setShowCreateModal(true)}
+          title="Create Product"
+        >
+          <CreateIcon />
+        </button>
+      </div>
+
       {/* Product Table */}
-      <Table responsive className="custom-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Name</th>
-            <th>Attributes</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((product) => (
-            <tr key={product.id}>
-              <td>{product.id_counter}</td>
-              <td>
-                {product.createdAt
-                  ? `Created At: ${new Date(
-                      product.createdAt
-                    ).toLocaleDateString()} ${new Date(
-                      product.createdAt
-                    ).toLocaleTimeString()}`
-                  : "Created At: N/A"}
-                <br />
-                {product.updatedAt
-                  ? `Updated At: ${new Date(
-                      product.updatedAt
-                    ).toLocaleDateString()} ${new Date(
-                      product.updatedAt
-                    ).toLocaleTimeString()}`
-                  : ""}
-              </td>
-              <td>{product.name}</td>
-              <td>
-                {product.data ? (
-                  <ul className="attributes-list">
-                    {Object.entries(product.data).map(([key, value]) => (
-                      <li key={key}>
-                        <strong>{key}:</strong> {value}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <span>No data</span>
-                )}
-              </td>
-              <td>
-                <div className="action-buttons">
-                  <button
-                    className="icon-btn icon-btn-edit"
-                    onClick={() => handleEdit(product)}
-                    title="Edit Product"
-                  >
-                    <EditIcon />
-                  </button>
-                  <button
-                    className="icon-btn icon-btn-delete"
-                    onClick={() => handleDeleteModal(product)}
-                    title="Delete Product"
-                  >
-                    <TrashIcon />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+      <ErrorBoundary>
+      <CustomTable products={products} handleEdit={handleEdit} handleDeleteModal={handleDeleteModal} />
+      </ErrorBoundary>
     </div>
   );
 }
