@@ -10,8 +10,22 @@ const ProtectedRoute = ({ children, requiredRoles }) => {
     }
 
     if (requiredRoles && !requiredRoles.includes(role)) {
+        if(role === 'admin'){
+            return <Navigate to="/admin" />;
+        }
+
+        if(role === 'editor') {
+            return <Navigate to="/editor" />;
+        }
+
+        if(role === 'viewer') {
+            return <Navigate to="/viewer" />;
+        }
+
         return <Navigate to="/unauthorized" />;
     }
+
+
 
     if (!requiredRoles && role !== 'admin' && role !== 'editor' && role !== 'viewer') {
         return <Navigate to="/unauthorized" />;

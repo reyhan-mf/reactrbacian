@@ -280,7 +280,7 @@ function AdminPage() {
 
       {/* Product Table */}
       <ErrorBoundary>
-      <CustomTable products={products} handleEdit={handleEdit} handleDeleteModal={handleDeleteModal} />
+      <CustomTable role={role} products={products} handleEdit={handleEdit} handleDeleteModal={handleDeleteModal} />
       </ErrorBoundary>
     </div>
   );
