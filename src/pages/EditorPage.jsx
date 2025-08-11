@@ -272,7 +272,7 @@ function AdminPage() {
       <br />
 
       <h1>
-        Welcome, <span style={{ fontWeight: "bold" }}>{role}</span>
+        Welcomes, <span style={{ fontWeight: "bold" }}>{role}</span>
       </h1>
       {/* <button onClick={handleRefreshSession}>Refresh Session</button> */}
 

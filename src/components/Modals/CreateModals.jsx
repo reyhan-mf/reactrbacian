@@ -8,7 +8,6 @@ function CreateModal({
   setNewProduct,
   newAttribute,
   setNewAttribute,
-  handleAddAttribute,
 }) {
   if (!showCreateModal) return null;
 
@@ -17,6 +16,45 @@ function CreateModal({
     setNewProduct({ ...newProduct, data: rest });
   };
 
+  const handleInternalAddAttribute = () => {
+    console.log("➕ [CreateModal] Add button clicked - newAttribute:", newAttribute);
+    console.log("➕ [CreateModal] Current newProduct.data before add:", newProduct.data);
+    
+    if (newAttribute.key && newAttribute.value) {
+      // Check if key already exists
+      const keyExists = newAttribute.key in newProduct.data;
+      
+      if (keyExists) {
+        const userConfirmed = confirm(
+          `Key "${newAttribute.key}" already exists with value "${newProduct.data[newAttribute.key]}". Do you want to update it to "${newAttribute.value}"?`
+        );
+        
+        if (!userConfirmed) {
+          return; // User cancelled, don't update
+        }
+      }
+      
+      const updatedData = { ...newProduct.data };
+      
+      // If key exists, remove it first to ensure it gets added at the end
+      if (keyExists) {
+        delete updatedData[newAttribute.key];
+      }
+      
+      // Add the new/updated attribute at the end
+      updatedData[newAttribute.key] = newAttribute.value;
+      
+      setNewProduct({ ...newProduct, data: updatedData });
+      setNewAttribute({ key: "", value: "" });
+      
+      console.log("➕ [CreateModal] State updated successfully");
+    } else {
+      console.log("❌ [CreateModal] Attribute addition failed - missing key or value");
+      alert("Both key and value are required to add an attribute.");
+    }
+  };
+
+  
   return (
     <div
       className={`modal fade ${showCreateModal ? "show" : ""}`}
@@ -83,11 +121,7 @@ function CreateModal({
                 <button 
                   type="button"
                   className="btn-add-attribute" 
-                  onClick={() => {
-                    console.log("➕ [CreateModal] Add button clicked - newAttribute:", newAttribute);
-                    console.log("➕ [CreateModal] Current newProduct.data before add:", newProduct.data);
-                    handleAddAttribute();
-                  }}
+                  onClick={handleInternalAddAttribute}
                   title="Add Attribute"
                 >
                   <CreateIcon />

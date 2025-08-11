@@ -124,52 +124,6 @@ function EditorPage() {
     return Array.from(productMap.values());
   };
 
-  const handleAddAttribute = () => {
-    console.log("➕ [AdminPage] handleAddAttribute called");
-    console.log("➕ [AdminPage] newAttribute:", newAttribute);
-    console.log("➕ [AdminPage] newProduct before add:", newProduct);
-    
-    if (newAttribute.key && newAttribute.value) {
-      // Check if key already exists
-      const keyExists = newAttribute.key in newProduct.data;
-      
-      if (keyExists) {
-        // Show info message for duplicate key
-        const userConfirmed = confirm(
-          `Key "${newAttribute.key}" already exists with value "${newProduct.data[newAttribute.key]}". Do you want to update it to "${newAttribute.value}"?`
-        );
-        
-        if (!userConfirmed) {
-          return; 
-        }
-      }
-      
-      const updatedData = { ...newProduct.data };
-      
-      if (keyExists) {
-        delete updatedData[newAttribute.key];
-      }
-      
-      // Add the new/updated attribute at the end
-      updatedData[newAttribute.key] = newAttribute.value;
-      
-      const updatedProduct = {
-        ...newProduct,
-        data: updatedData,
-      };
-      
-      console.log("➕ [AdminPage] updatedProduct:", updatedProduct);
-      
-      setNewProduct(updatedProduct);
-      setNewAttribute({ key: "", value: "" });
-      
-      console.log("➕ [AdminPage] State updated successfully");
-    } else {
-      console.log("❌ [AdminPage] Attribute addition failed - missing key or value");
-      alert("Both key and value are required to add an attribute.");
-    }
-  };
-
   const handleCreateProduct = async () => {
     if (!newProduct.name) {
       alert("Product name is required!");
@@ -272,7 +226,6 @@ function EditorPage() {
         setNewProduct={setNewProduct}
         newAttribute={newAttribute}
         setNewAttribute={setNewAttribute}
-        handleAddAttribute={handleAddAttribute}
       />
       {/* END Create Product Modal */}
 
