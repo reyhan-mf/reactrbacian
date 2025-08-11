@@ -11,7 +11,7 @@ function CustomTable({ role, products, handleEdit, handleDeleteModal }) {
           <th>Date</th>
           <th>Name</th>
           <th>Attributes</th>
-          <th>Actions</th>
+          {role === "admin" || role === "editor" ? <th>Actions</th> : null}
         </tr>
       </thead>
       <tbody>
@@ -19,6 +19,7 @@ function CustomTable({ role, products, handleEdit, handleDeleteModal }) {
           <tr key={product.id}>
             <td>{product.id_counter}</td>
             <td>
+             
               {product.createdAt
                 ? `Created At: ${new Date(
                     product.createdAt
