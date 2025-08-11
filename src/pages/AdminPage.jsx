@@ -13,6 +13,7 @@ import CollapsibleNavbar from "../components/NavBar";
 import CreateModal from "../components/Modals/CreateModals";
 import EditModal from "../components/Modals/EditModal";
 import DeleteModal from "../components/Modals/DeleteModal";
+import Table from 'react-bootstrap/Table';
 
 function AdminPage() {
   const { role, logout } = useContext(Context);
@@ -253,7 +254,7 @@ const handleConfirmDelete = async (id) => {
       />
 
       {/* Product Table */}
-      <table>
+      <Table  responsive className="custom-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -305,7 +306,7 @@ const handleConfirmDelete = async (id) => {
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
     </div>
   );
 }
