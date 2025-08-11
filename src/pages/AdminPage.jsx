@@ -19,7 +19,7 @@ import {
   updateProduct,
 } from "../services/ProductServices";
 
-function AdminPage() {
+function EditorPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -30,20 +30,28 @@ function AdminPage() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
+
   useEffect(() => {
     const loadData = async () => {
       const localData = getLocalProducts();
+      if (localData && localData.length > 0) {
+        console.log("Loading products from Local Storage");
+        setProducts(localData);
+        return;
+      }
 
       try {
         console.log("Loading products from API");
-        const apiData = await fetchProducts();
-
+        let apiData = []; 
+        if (!localData || localData.length === 0) {
+          apiData = await fetchProducts();
+        }
         if (localData && localData.length > 0) {
           console.log("Merging with existing local data");
           const mergedData = mergeApiWithLocal(apiData, localData);
           setProducts(mergedData);
           saveProductsLocally(mergedData);
-        } else {
+        } else if (apiData.length > 0) {
           console.log("Using fresh API data");
           setProducts(apiData);
           saveProductsLocally(apiData);
@@ -286,4 +294,4 @@ function AdminPage() {
   );
 }
 
-export default AdminPage;
+export default EditorPage;
