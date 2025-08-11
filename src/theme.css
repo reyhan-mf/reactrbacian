@@ -194,6 +194,7 @@ table {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     max-width: 1390px;
     margin: 0 auto; 
+    margin-bottom: 7rem;
 }
 
 th {

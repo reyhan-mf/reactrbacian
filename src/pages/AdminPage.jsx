@@ -10,6 +10,10 @@ import {
   updateProduct,
 } from "../services/ProductServices";
 import CollapsibleNavbar from "../components/NavBar";
+import CreateModal from "../components/Modals/CreateModals";
+import EditModal from "../components/Modals/EditModal";
+import DeleteModal from "../components/Modals/DeleteModal";
+
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
@@ -18,7 +22,8 @@ function AdminPage() {
   const [newProduct, setNewProduct] = useState({ name: "", data: {} });
   const [editingProduct, setEditingProduct] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
   useEffect(() => {
     const loadData = async () => {
       const localData = getLocalProducts();
@@ -49,22 +54,32 @@ function AdminPage() {
     loadData();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (
-      window.confirm(`Are you sure you want to delete product with ID: ${id}?`)
-    ) {
-      try {
-        const updatedProducts = products.filter((product) => product.id !== id);
-        setProducts(updatedProducts);
-        saveProductsLocally(updatedProducts);
-
-        await deleteProduct(id);
-      } catch (error) {
-        console.error("Error deleting product:", error);
-      }
-    }
+  const handleDeleteModal = (product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
   };
 
+const handleCancelDelete = () => {
+  setProductToDelete(null);
+  setShowDeleteModal(false);
+};
+
+const handleConfirmDelete = async (id) => {
+  try {
+    setShowDeleteModal(false);
+    setProductToDelete(null);
+
+    const updatedProducts = products.filter((product) => product.id !== id);
+    setProducts(updatedProducts);
+    saveProductsLocally(updatedProducts);
+
+    await deleteProduct(id);
+
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    alert("Failed to delete product. Please try again.");
+  }
+};
   const mergeApiWithLocal = (apiData, localData) => {
     const locallyCreatedProducts = localData.filter(
       (product) => !product.isCloned
@@ -197,7 +212,7 @@ function AdminPage() {
   };
 
   return (
-    <div >
+    <div>
       <CollapsibleNavbar role={role} logout={handleLogout} />
       <br />
       <h1>Welcome, {role}</h1>
@@ -205,215 +220,38 @@ function AdminPage() {
       <br />
       <br />
       <button onClick={() => setShowCreateModal(true)}>Create Product</button>
+
       {/* Create Product Modal */}
-      {/* Create Product Modal */}
-      <div
-        className={`modal fade ${showCreateModal ? "show" : ""}`}
-        style={{ display: showCreateModal ? "block" : "none" }}
-        tabIndex="-1"
-        role="dialog"
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Create Product</h5>
-              <button
-                type="button"
-                className="close"
-                onClick={handleCancelCreate}
-                aria-label="Close"
-              >
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <div>
-                <label>
-                  Name:
-                  <input
-                    type="text"
-                    value={newProduct.name}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, name: e.target.value })
-                    }
-                  />
-                </label>
-              </div>
-              <div>
-                <h3>Attributes</h3>
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Key"
-                    value={newAttribute.key}
-                    onChange={(e) =>
-                      setNewAttribute({ ...newAttribute, key: e.target.value })
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder="Value"
-                    value={newAttribute.value}
-                    onChange={(e) =>
-                      setNewAttribute({
-                        ...newAttribute,
-                        value: e.target.value,
-                      })
-                    }
-                  />
-                  <button onClick={handleAddAttribute}>Add Attribute</button>
-                </div>
-                <ul>
-                  {Object.entries(newProduct.data).map(([key, value]) => (
-                    <li key={key}>
-                      <strong>{key}:</strong> {value}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={handleCreateProduct}
-              >
-                Create Product
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={handleCancelCreate}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <CreateModal
+        showCreateModal={showCreateModal}
+        handleCancelCreate={handleCancelCreate}
+        handleCreateProduct={handleCreateProduct}
+        newProduct={newProduct}
+        setNewProduct={setNewProduct}
+        newAttribute={newAttribute}
+        setNewAttribute={setNewAttribute}
+        handleAddAttribute={handleAddAttribute}
+      />
+      {/* END Create Product Modal */}
 
       {/* Edit Product Modal */}
-{/* Edit Product Modal */}
-<div
-  className={`modal fade ${editingProduct ? "show" : ""}`}
-  style={{ display: editingProduct ? "block" : "none" }}
-  tabIndex="-1"
-  role="dialog"
->
-  <div className="modal-dialog" role="document">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h5 className="modal-title">Edit Product</h5>
-        <button
-          type="button"
-          className="close"
-          onClick={() => setEditingProduct(null)}
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div className="modal-body">
-        <div>
-          <label>
-            Name:
-            <input
-              type="text"
-              value={editingProduct?.name || ""}
-              onChange={(e) =>
-                setEditingProduct({ ...editingProduct, name: e.target.value })
-              }
-            />
-          </label>
-        </div>
-        <div>
-          <h3>Attributes</h3>
-          <ul>
-            {Object.entries(editingProduct?.data || {}).map(([key, value]) => (
-              <li key={key}>
-                <input
-                  type="text"
-                  value={key}
-                  onChange={(e) => {
-                    const newKey = e.target.value;
-                    const { [key]: oldValue, ...rest } = editingProduct.data;
-                    setEditingProduct({
-                      ...editingProduct,
-                      data: { ...rest, [newKey]: oldValue },
-                    });
-                  }}
-                />
-                <input
-                  type="text"
-                  value={value}
-                  onChange={(e) =>
-                    setEditingProduct({
-                      ...editingProduct,
-                      data: { ...editingProduct.data, [key]: e.target.value },
-                    })
-                  }
-                />
-              </li>
-            ))}
-          </ul>
-          {/* Add New Attribute */}
-          <div>
-            <input
-              type="text"
-              placeholder="New Attribute Key"
-              value={newAttribute.key}
-              onChange={(e) =>
-                setNewAttribute({ ...newAttribute, key: e.target.value })
-              }
-            />
-            <input
-              type="text"
-              placeholder="New Attribute Value"
-              value={newAttribute.value}
-              onChange={(e) =>
-                setNewAttribute({ ...newAttribute, value: e.target.value })
-              }
-            />
-            <button
-              onClick={() => {
-                if (newAttribute.key && newAttribute.value) {
-                  setEditingProduct((prev) => ({
-                    ...prev,
-                    data: {
-                      ...prev.data,
-                      [newAttribute.key]: newAttribute.value,
-                    },
-                  }));
-                  setNewAttribute({ key: "", value: "" });
-                } else {
-                  alert("Both key and value are required to add an attribute.");
-                }
-              }}
-            >
-              Add Attribute
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="modal-footer">
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={handleUpdateProduct}
-        >
-          Save Changes
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => setEditingProduct(null)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+      <EditModal
+        editingProduct={editingProduct}
+        setEditingProduct={setEditingProduct}
+        newAttribute={newAttribute}
+        setNewAttribute={setNewAttribute}
+        handleUpdateProduct={handleUpdateProduct}
+        handleCancelEdit={() => setEditingProduct(null)}
+      />
+      {/* END Edit Product Modal */}
+
+      <DeleteModal
+        showDeleteModal={showDeleteModal}
+        handleCancelDelete={handleCancelDelete}
+        handleConfirmDelete={handleConfirmDelete}
+        productToDelete={productToDelete}
+      />
+
       {/* Product Table */}
       <table>
         <thead>
@@ -462,13 +300,12 @@ function AdminPage() {
               </td>
               <td>
                 <button onClick={() => handleEdit(product)}>Edit</button>
-                <button onClick={() => handleDelete(product.id)}>Delete</button>
+                <button onClick={() => handleDeleteModal(product)}>Delete</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
     </div>
   );
 }
