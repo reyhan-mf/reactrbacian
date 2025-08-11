@@ -259,7 +259,7 @@ function EditorPage() {
       <h1>
         Welcome, <span style={{ fontWeight: "bold" }}>{role}</span>
       </h1>
-      <button onClick={handleRefreshSession}>Refresh Session</button>
+      {/* <button onClick={handleRefreshSession}>Refresh Session</button> */}
 
       <div className="table-header-actions">
         <h2 className="table-title">Products</h2>

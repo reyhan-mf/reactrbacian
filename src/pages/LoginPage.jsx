@@ -200,7 +200,7 @@ function LoginPage() {
                           style={{
                             cursor: "pointer",
                             fontSize: "1rem",
-                            padding: "0.75rem",
+                            padding: "1.75rem",
                           }}
                         >
                           <option value="" disabled>

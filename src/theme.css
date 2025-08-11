@@ -684,10 +684,9 @@ body.modal-open {
 
 /* Login Form Select Dropdown Options */
 .login-form .form-control option {
-  background: var(--dark) !important;
+  background: var(--darker) !important;
   color: var(--text-primary) !important;
-  padding: 3.5rem !important;
-}
+ padding: 1rem !important; }
 
 .login-form .form-control option:hover,
 .login-form .form-control option:checked,
