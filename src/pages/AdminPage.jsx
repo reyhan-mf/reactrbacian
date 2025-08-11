@@ -199,6 +199,7 @@ function AdminPage() {
   return (
     <div >
       <CollapsibleNavbar role={role} logout={handleLogout} />
+      <br />
       <h1>Welcome, {role}</h1>
       <button onClick={handleRefreshSession}>Refresh Session</button>
       <br />
