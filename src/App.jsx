@@ -1,4 +1,5 @@
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom'
+import {Navigate} from 'react-router-dom'
 import './App.css'
 import ContextProvider from './context/ContextProvider'
 import ProtectedRoute from './context/ProtectedRoute'
@@ -34,6 +35,8 @@ function App() {
             </ProtectedRoute>
           } />
           <Route path="/unauthorized" element={<UnauthorizedPage />} />
+          
+          <Route path="*" element={<Navigate to="/" replace />} />
 
         </Routes>
       </Router>
