@@ -5,15 +5,13 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 
 function CollapsibleNavbar({ role, logout }) {
   return (
-    <Navbar collapseOnSelect expand="lg" className="bg-body-tertiary">
+    <Navbar sticky="top" collapseOnSelect expand="lg" className="bg-body-tertiary">
       <Container>
         <Navbar.Brand href="#home">React-Bootstrap</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
         <Navbar.Collapse id="responsive-navbar-nav">
           <Nav className="ms-auto">
             <NavDropdown title={`User (${role})`} id="user-nav-dropdown">
-              <NavDropdown.Item href="#profile">Profile</NavDropdown.Item>
-              <NavDropdown.Divider />
               <NavDropdown.Item onClick={logout}>Logout</NavDropdown.Item>
             </NavDropdown>
           </Nav>
