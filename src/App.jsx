@@ -7,6 +7,8 @@ import EditorPage from './pages/EditorPage'
 import LoginPage from './pages/LoginPage'
 import UnauthorizedPage from './pages/UnauthorizedPage'
 import ViewerPage from './pages/ViewerPage'
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 function App() {
   return (

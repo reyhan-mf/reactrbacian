@@ -9,6 +9,7 @@ import {
   saveProductsLocally,
   updateProduct,
 } from "../services/ProductServices";
+
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
@@ -118,12 +119,12 @@ function AdminPage() {
       const updatedProducts = [...products, createdProduct];
       setProducts(updatedProducts);
       saveProductsLocally(updatedProducts);
-      
+
       // Reset form and close modal
       setNewProduct({ name: "", data: {} });
       setNewAttribute({ key: "", value: "" });
       setShowCreateModal(false);
-      
+
       console.log("Product created:", createdProduct);
     } catch (error) {
       console.error("Error creating product:", error);
@@ -140,7 +141,6 @@ function AdminPage() {
   const handleEdit = (product) => {
     setEditingProduct(product);
   };
-
 
   const handleUpdateProduct = async () => {
     if (!editingProduct.name) {
@@ -203,151 +203,215 @@ function AdminPage() {
       <br />
       <br />
       <button onClick={() => setShowCreateModal(true)}>Create Product</button>
-      
       {/* Create Product Modal */}
-      {showCreateModal && (
-        <div className="modal">
-          <div>
-            <h2>Create Product</h2>
-            <div>
-              <label>
-                Name:
-                <input
-                  type="text"
-                  value={newProduct.name}
-                  onChange={(e) =>
-                    setNewProduct({ ...newProduct, name: e.target.value })
-                  }
-                />
-              </label>
+      {/* Create Product Modal */}
+      <div
+        className={`modal fade ${showCreateModal ? "show" : ""}`}
+        style={{ display: showCreateModal ? "block" : "none" }}
+        tabIndex="-1"
+        role="dialog"
+      >
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Create Product</h5>
+              <button
+                type="button"
+                className="close"
+                onClick={handleCancelCreate}
+                aria-label="Close"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
             </div>
-            <div>
-              <h3>Attributes</h3>
+            <div className="modal-body">
               <div>
-                <input
-                  type="text"
-                  placeholder="Key"
-                  value={newAttribute.key}
-                  onChange={(e) =>
-                    setNewAttribute({ ...newAttribute, key: e.target.value })
-                  }
-                />
-                <input
-                  type="text"
-                  placeholder="Value"
-                  value={newAttribute.value}
-                  onChange={(e) =>
-                    setNewAttribute({ ...newAttribute, value: e.target.value })
-                  }
-                />
-                <button onClick={handleAddAttribute}>Add Attribute</button>
-              </div>
-              <ul>
-                {Object.entries(newProduct.data).map(([key, value]) => (
-                  <li key={key}>
-                    <strong>{key}:</strong> {value}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <button onClick={handleCreateProduct}>Create Product</button>
-            <button onClick={handleCancelCreate}>Cancel</button>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Product Modal */}
-      {editingProduct && (
-        <div className="modal">
-          <div>
-            <h2>Edit Product</h2>
-          <div>
-            <label>
-              Name:
-              <input
-                type="text"
-                value={editingProduct.name}
-                onChange={(e) =>
-                  setEditingProduct({ ...editingProduct, name: e.target.value })
-                }
-              />
-            </label>
-          </div>
-          <div>
-            <h3>Attributes</h3>
-            <ul>
-              {Object.entries(editingProduct.data || {}).map(([key, value]) => (
-                <li key={key}>
+                <label>
+                  Name:
                   <input
                     type="text"
-                    value={key}
-                    onChange={(e) => {
-                      const newKey = e.target.value;
-                      const { [key]: oldValue, ...rest } = editingProduct.data;
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: { ...rest, [newKey]: oldValue },
-                      });
-                    }}
+                    value={newProduct.name}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, name: e.target.value })
+                    }
+                  />
+                </label>
+              </div>
+              <div>
+                <h3>Attributes</h3>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Key"
+                    value={newAttribute.key}
+                    onChange={(e) =>
+                      setNewAttribute({ ...newAttribute, key: e.target.value })
+                    }
                   />
                   <input
                     type="text"
-                    value={value}
+                    placeholder="Value"
+                    value={newAttribute.value}
                     onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: { ...editingProduct.data, [key]: e.target.value },
+                      setNewAttribute({
+                        ...newAttribute,
+                        value: e.target.value,
                       })
                     }
                   />
-                </li>
-              ))}
-            </ul>
-            {/* Add New Attribute */}
-            <div>
-              <input
-                type="text"
-                placeholder="New Attribute Key"
-                value={newAttribute.key}
-                onChange={(e) =>
-                  setNewAttribute({ ...newAttribute, key: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="New Attribute Value"
-                value={newAttribute.value}
-                onChange={(e) =>
-                  setNewAttribute({ ...newAttribute, value: e.target.value })
-                }
-              />
+                  <button onClick={handleAddAttribute}>Add Attribute</button>
+                </div>
+                <ul>
+                  {Object.entries(newProduct.data).map(([key, value]) => (
+                    <li key={key}>
+                      <strong>{key}:</strong> {value}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="modal-footer">
               <button
-                onClick={() => {
-                  if (newAttribute.key && newAttribute.value) {
-                    setEditingProduct((prev) => ({
-                      ...prev,
-                      data: {
-                        ...prev.data,
-                        [newAttribute.key]: newAttribute.value,
-                      },
-                    }));
-                    setNewAttribute({ key: "", value: "" });
-                  } else {
-                    alert(
-                      "Both key and value are required to add an attribute."
-                    );
-                  }
-                }}
+                type="button"
+                className="btn btn-primary"
+                onClick={handleCreateProduct}
               >
-                Add Attribute
+                Create Product
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleCancelCreate}
+              >
+                Cancel
               </button>
             </div>
           </div>
-          <button onClick={handleUpdateProduct}>Save Changes</button>
-          <button onClick={() => setEditingProduct(null)}>Cancel</button>
+        </div>
+      </div>
+
+      {/* Edit Product Modal */}
+{/* Edit Product Modal */}
+<div
+  className={`modal fade ${editingProduct ? "show" : ""}`}
+  style={{ display: editingProduct ? "block" : "none" }}
+  tabIndex="-1"
+  role="dialog"
+>
+  <div className="modal-dialog" role="document">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h5 className="modal-title">Edit Product</h5>
+        <button
+          type="button"
+          className="close"
+          onClick={() => setEditingProduct(null)}
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        <div>
+          <label>
+            Name:
+            <input
+              type="text"
+              value={editingProduct?.name || ""}
+              onChange={(e) =>
+                setEditingProduct({ ...editingProduct, name: e.target.value })
+              }
+            />
+          </label>
+        </div>
+        <div>
+          <h3>Attributes</h3>
+          <ul>
+            {Object.entries(editingProduct?.data || {}).map(([key, value]) => (
+              <li key={key}>
+                <input
+                  type="text"
+                  value={key}
+                  onChange={(e) => {
+                    const newKey = e.target.value;
+                    const { [key]: oldValue, ...rest } = editingProduct.data;
+                    setEditingProduct({
+                      ...editingProduct,
+                      data: { ...rest, [newKey]: oldValue },
+                    });
+                  }}
+                />
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) =>
+                    setEditingProduct({
+                      ...editingProduct,
+                      data: { ...editingProduct.data, [key]: e.target.value },
+                    })
+                  }
+                />
+              </li>
+            ))}
+          </ul>
+          {/* Add New Attribute */}
+          <div>
+            <input
+              type="text"
+              placeholder="New Attribute Key"
+              value={newAttribute.key}
+              onChange={(e) =>
+                setNewAttribute({ ...newAttribute, key: e.target.value })
+              }
+            />
+            <input
+              type="text"
+              placeholder="New Attribute Value"
+              value={newAttribute.value}
+              onChange={(e) =>
+                setNewAttribute({ ...newAttribute, value: e.target.value })
+              }
+            />
+            <button
+              onClick={() => {
+                if (newAttribute.key && newAttribute.value) {
+                  setEditingProduct((prev) => ({
+                    ...prev,
+                    data: {
+                      ...prev.data,
+                      [newAttribute.key]: newAttribute.value,
+                    },
+                  }));
+                  setNewAttribute({ key: "", value: "" });
+                } else {
+                  alert("Both key and value are required to add an attribute.");
+                }
+              }}
+            >
+              Add Attribute
+            </button>
           </div>
         </div>
-      )}
+      </div>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleUpdateProduct}
+        >
+          Save Changes
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setEditingProduct(null)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
       {/* Product Table */}
       <table>
         <thead>
