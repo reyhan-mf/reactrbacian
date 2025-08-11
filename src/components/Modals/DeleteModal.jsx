@@ -1,6 +1,7 @@
 function DeleteModal({ showDeleteModal, handleCancelDelete, handleConfirmDelete, productToDelete }) {
   if (!showDeleteModal) return null;
 
+  
   return (
     <div
       className={`modal fade ${showDeleteModal ? "show" : ""}`}
@@ -23,7 +24,7 @@ function DeleteModal({ showDeleteModal, handleCancelDelete, handleConfirmDelete,
           </div>
           <div className="modal-body">
             <p>
-              Are you sure you want to delete the product{" "}
+              Are you sure you want to delete the product <br /> {" "}
               <strong>{productToDelete?.name}</strong>?
             </p>
           </div>

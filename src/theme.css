@@ -276,3 +276,31 @@ body {
   border: 1px solid rgba(239, 68, 68, 0.3) !important;
   color: #ef4444 !important;
 }
+
+/* Modals */
+body.modal-open {
+  overflow: hidden !important;
+}
+
+.modal {
+  overflow: hidden !important;
+}
+
+.modal-dialog {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh; 
+  overflow: hidden !important;
+}
+
+.modal-content {
+  margin: auto;
+  max-height: 90vh; /* Prevent modal from being too tall */
+  overflow: hidden !important;
+}
+
+.modal-body {
+  overflow: hidden !important;
+  max-height: 60vh; /* Adjust as needed */
+}
