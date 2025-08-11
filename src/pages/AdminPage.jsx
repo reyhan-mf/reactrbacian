@@ -1,6 +1,15 @@
 import { useContext, useEffect, useState } from "react";
+import Table from "react-bootstrap/Table";
 import { useNavigate } from "react-router-dom";
+import CreateIcon from "../components/Icons/CreateIcon";
+import TrashIcon from "../components/Icons/DeleteIcon";
+import EditIcon from "../components/Icons/EditIcon";
+import CreateModal from "../components/Modals/CreateModals";
+import DeleteModal from "../components/Modals/DeleteModal";
+import EditModal from "../components/Modals/EditModal";
+import CollapsibleNavbar from "../components/NavBar";
 import Context from "../context/context";
+
 import {
   createProduct,
   deleteProduct,
@@ -9,17 +18,13 @@ import {
   saveProductsLocally,
   updateProduct,
 } from "../services/ProductServices";
-import CollapsibleNavbar from "../components/NavBar";
-import CreateModal from "../components/Modals/CreateModals";
-import EditModal from "../components/Modals/EditModal";
-import DeleteModal from "../components/Modals/DeleteModal";
-import Table from 'react-bootstrap/Table';
 
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [newAttribute, setNewAttribute] = useState({ key: "", value: "" });
+  const [editAttribute, setEditAttribute] = useState({ key: "", value: "" });
   const [newProduct, setNewProduct] = useState({ name: "", data: {} });
   const [editingProduct, setEditingProduct] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -60,27 +65,26 @@ function AdminPage() {
     setShowDeleteModal(true);
   };
 
-const handleCancelDelete = () => {
-  setProductToDelete(null);
-  setShowDeleteModal(false);
-};
-
-const handleConfirmDelete = async (id) => {
-  try {
-    setShowDeleteModal(false);
+  const handleCancelDelete = () => {
     setProductToDelete(null);
+    setShowDeleteModal(false);
+  };
 
-    const updatedProducts = products.filter((product) => product.id !== id);
-    setProducts(updatedProducts);
-    saveProductsLocally(updatedProducts);
+  const handleConfirmDelete = async (id) => {
+    try {
+      setShowDeleteModal(false);
+      setProductToDelete(null);
 
-    await deleteProduct(id);
+      const updatedProducts = products.filter((product) => product.id !== id);
+      setProducts(updatedProducts);
+      saveProductsLocally(updatedProducts);
 
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    alert("Failed to delete product. Please try again.");
-  }
-};
+      await deleteProduct(id);
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      alert("Failed to delete product. Please try again.");
+    }
+  };
   const mergeApiWithLocal = (apiData, localData) => {
     const locallyCreatedProducts = localData.filter(
       (product) => !product.isCloned
@@ -121,6 +125,8 @@ const handleConfirmDelete = async (id) => {
         data: { ...prev.data, [newAttribute.key]: newAttribute.value },
       }));
       setNewAttribute({ key: "", value: "" });
+    } else {
+      alert("Both key and value are required to add an attribute.");
     }
   };
 
@@ -156,6 +162,7 @@ const handleConfirmDelete = async (id) => {
 
   const handleEdit = (product) => {
     setEditingProduct(product);
+    setEditAttribute({ key: "", value: "" }); // Reset edit attribute state
   };
 
   const handleUpdateProduct = async () => {
@@ -174,6 +181,7 @@ const handleConfirmDelete = async (id) => {
       setProducts(updatedProducts);
       saveProductsLocally(updatedProducts);
       setEditingProduct(null);
+      setEditAttribute({ key: "", value: "" }); // Reset edit attribute state
 
       if (updatedProductFromService.isLocallyModified) {
         console.log(
@@ -220,7 +228,17 @@ const handleConfirmDelete = async (id) => {
       <button onClick={handleRefreshSession}>Refresh Session</button>
       <br />
       <br />
-      <button onClick={() => setShowCreateModal(true)}>Create Product</button>
+
+<div className="table-header-actions">
+        <h2 className="table-title">Products</h2>
+        <button
+          className="icon-btn icon-btn-create"
+          onClick={() => setShowCreateModal(true)}
+          title="Create Product"
+        >
+          <CreateIcon />
+        </button>
+      </div>
 
       {/* Create Product Modal */}
       <CreateModal
@@ -239,10 +257,13 @@ const handleConfirmDelete = async (id) => {
       <EditModal
         editingProduct={editingProduct}
         setEditingProduct={setEditingProduct}
-        newAttribute={newAttribute}
-        setNewAttribute={setNewAttribute}
+        newAttribute={editAttribute}
+        setNewAttribute={setEditAttribute}
         handleUpdateProduct={handleUpdateProduct}
-        handleCancelEdit={() => setEditingProduct(null)}
+        handleCancelEdit={() => {
+          setEditingProduct(null);
+          setEditAttribute({ key: "", value: "" });
+        }}
       />
       {/* END Edit Product Modal */}
 
@@ -254,7 +275,7 @@ const handleConfirmDelete = async (id) => {
       />
 
       {/* Product Table */}
-      <Table  responsive className="custom-table">
+      <Table responsive className="custom-table">
         <thead>
           <tr>
             <th>ID</th>
@@ -300,8 +321,22 @@ const handleConfirmDelete = async (id) => {
                 )}
               </td>
               <td>
-                <button onClick={() => handleEdit(product)}>Edit</button>
-                <button onClick={() => handleDeleteModal(product)}>Delete</button>
+                <div className="action-buttons">
+                  <button
+                    className="icon-btn icon-btn-edit"
+                    onClick={() => handleEdit(product)}
+                    title="Edit Product"
+                  >
+                    <EditIcon />
+                  </button>
+                  <button
+                    className="icon-btn icon-btn-delete"
+                    onClick={() => handleDeleteModal(product)}
+                    title="Delete Product"
+                  >
+                    <TrashIcon />
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
