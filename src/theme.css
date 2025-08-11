@@ -631,6 +631,7 @@ body.modal-open {
   transition: all 0.3s ease !important;
   text-align: center !important;
   cursor: pointer !important;
+
 }
 
 .role-info-card:hover {
@@ -685,7 +686,7 @@ body.modal-open {
 .login-form .form-control option {
   background: var(--dark) !important;
   color: var(--text-primary) !important;
-  padding: 0.5rem !important;
+  padding: 3.5rem !important;
 }
 
 .login-form .form-control option:hover,

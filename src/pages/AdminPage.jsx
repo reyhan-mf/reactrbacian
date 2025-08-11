@@ -8,6 +8,7 @@ import EditModal from "../components/Modals/EditModal";
 import CollapsibleNavbar from "../components/NavBar";
 import CustomTable from "../components/Tables";
 import Context from "../context/context";
+
 import {
   createProduct,
   deleteProduct,
