@@ -9,7 +9,7 @@ import {
   saveProductsLocally,
   updateProduct,
 } from "../services/ProductServices";
-
+import CollapsibleNavbar from "../components/NavBar";
 function AdminPage() {
   const { role, logout } = useContext(Context);
   const navigate = useNavigate();
@@ -198,6 +198,7 @@ function AdminPage() {
 
   return (
     <div>
+      <CollapsibleNavbar role={role} logout={handleLogout} />
       <h1>Welcome, {role}</h1>
       <button onClick={handleRefreshSession}>Refresh Session</button>
       <br />
@@ -467,8 +468,6 @@ function AdminPage() {
         </tbody>
       </table>
 
-      <br />
-      <button onClick={handleLogout}>Logout</button>
     </div>
   );
 }
