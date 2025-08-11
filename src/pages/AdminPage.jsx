@@ -141,9 +141,6 @@ function AdminPage() {
     setEditingProduct(product);
   };
 
-  const handleAddData = (product) => {
-    setNewProduct(product);
-  };
 
   const handleUpdateProduct = async () => {
     if (!editingProduct.name) {
