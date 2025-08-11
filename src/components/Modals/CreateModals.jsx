@@ -1,6 +1,5 @@
-import CreateIcon from "../Icons/CreateIcon";
-import DeleteIcon from "../Icons/DeleteIcon";
 import { IoClose } from "react-icons/io5";
+import CreateIcon from "../Icons/CreateIcon";
 function CreateModal({
   showCreateModal,
   handleCancelCreate,
@@ -84,7 +83,11 @@ function CreateModal({
                 <button 
                   type="button"
                   className="btn-add-attribute" 
-                  onClick={handleAddAttribute}
+                  onClick={() => {
+                    console.log("➕ [CreateModal] Add button clicked - newAttribute:", newAttribute);
+                    console.log("➕ [CreateModal] Current newProduct.data before add:", newProduct.data);
+                    handleAddAttribute();
+                  }}
                   title="Add Attribute"
                 >
                   <CreateIcon />
@@ -110,6 +113,10 @@ function CreateModal({
                     </div>
                   ))}
                 </div>
+              )}
+              
+              {Object.entries(newProduct.data).length === 0 && (
+                <p style={{ color: "#666", fontStyle: "italic", marginTop: '1rem' }}>No attributes added yet</p>
               )}
             </div>
           </div>

@@ -1,15 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ErrorBoundary from "../components/ErrorBoundary";
 import CreateIcon from "../components/Icons/CreateIcon";
-import TrashIcon from "../components/Icons/DeleteIcon";
-import EditIcon from "../components/Icons/EditIcon";
 import CreateModal from "../components/Modals/CreateModals";
 import DeleteModal from "../components/Modals/DeleteModal";
 import EditModal from "../components/Modals/EditModal";
 import CollapsibleNavbar from "../components/NavBar";
-import Context from "../context/context";
 import CustomTable from "../components/Tables";
-import ErrorBoundary from "../components/ErrorBoundary";
+import Context from "../context/context";
 import {
   createProduct,
   deleteProduct,
@@ -127,13 +125,47 @@ function EditorPage() {
   };
 
   const handleAddAttribute = () => {
+    console.log("➕ [AdminPage] handleAddAttribute called");
+    console.log("➕ [AdminPage] newAttribute:", newAttribute);
+    console.log("➕ [AdminPage] newProduct before add:", newProduct);
+    
     if (newAttribute.key && newAttribute.value) {
-      setNewProduct((prev) => ({
-        ...prev,
-        data: { ...prev.data, [newAttribute.key]: newAttribute.value },
-      }));
+      // Check if key already exists
+      const keyExists = newAttribute.key in newProduct.data;
+      
+      if (keyExists) {
+        // Show info message for duplicate key
+        const userConfirmed = confirm(
+          `Key "${newAttribute.key}" already exists with value "${newProduct.data[newAttribute.key]}". Do you want to update it to "${newAttribute.value}"?`
+        );
+        
+        if (!userConfirmed) {
+          return; 
+        }
+      }
+      
+      const updatedData = { ...newProduct.data };
+      
+      if (keyExists) {
+        delete updatedData[newAttribute.key];
+      }
+      
+      // Add the new/updated attribute at the end
+      updatedData[newAttribute.key] = newAttribute.value;
+      
+      const updatedProduct = {
+        ...newProduct,
+        data: updatedData,
+      };
+      
+      console.log("➕ [AdminPage] updatedProduct:", updatedProduct);
+      
+      setNewProduct(updatedProduct);
       setNewAttribute({ key: "", value: "" });
+      
+      console.log("➕ [AdminPage] State updated successfully");
     } else {
+      console.log("❌ [AdminPage] Attribute addition failed - missing key or value");
       alert("Both key and value are required to add an attribute.");
     }
   };
@@ -273,7 +305,7 @@ function EditorPage() {
       <h1>
         Welcome, <span style={{ fontWeight: "bold" }}>{role}</span>
       </h1>
-      {/* <button onClick={handleRefreshSession}>Refresh Session</button> */}
+      <button onClick={handleRefreshSession}>Refresh Session</button>
 
       <div className="table-header-actions">
         <h2 className="table-title">Products</h2>

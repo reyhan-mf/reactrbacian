@@ -20,16 +20,49 @@ function EditModal({
   };
 
   const handleAddNewAttribute = () => {
+    console.log("➕ [EditModal] Adding new attribute - key:", newAttribute.key, "value:", newAttribute.value);
+    console.log("➕ [EditModal] Current editingProduct.data before add:", editingProduct?.data);
+    
     if (newAttribute.key && newAttribute.value) {
-      setEditingProduct((prev) => ({
-        ...prev,
-        data: {
-          ...prev.data,
-          [newAttribute.key]: newAttribute.value,
-        },
-      }));
+      // Check if key already exists
+      const keyExists = newAttribute.key in (editingProduct.data || {});
+      
+      if (keyExists) {
+        // Show info message for duplicate key
+        const userConfirmed = confirm(
+          `Key "${newAttribute.key}" already exists with value "${editingProduct.data[newAttribute.key]}". Do you want to update it to "${newAttribute.value}"?`
+        );
+        
+        if (!userConfirmed) {
+          return; // User cancelled, don't update
+        }
+      }
+      
+      const updatedData = { ...editingProduct.data };
+      
+      // If key exists, remove it first to ensure it gets added at the end
+      if (keyExists) {
+        delete updatedData[newAttribute.key];
+      }
+      
+      // Add the new/updated attribute at the end
+      updatedData[newAttribute.key] = newAttribute.value;
+      
+      console.log("➕ [EditModal] New data object:", updatedData);
+      
+      setEditingProduct((prev) => {
+        const updated = {
+          ...prev,
+          data: updatedData,
+        };
+        console.log("➕ [EditModal] Updated editingProduct:", updated);
+        return updated;
+      });
+      
       setNewAttribute({ key: "", value: "" });
+      console.log("➕ [EditModal] Reset newAttribute state - should re-render now");
     } else {
+      console.log("❌ [EditModal] Attribute addition failed - missing key or value");
       alert("Both key and value are required to add an attribute.");
     }
   };
@@ -78,48 +111,52 @@ function EditModal({
               <h6 className="attributes-title">Product Attributes</h6>
 
               {/* Display Existing Attributes for Editing */}
-              {Object.entries(editingProduct?.data || {}).map(([key, value], index) => (
-                <div key={`attribute-${index}`} className="attribute-item">
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={key}
-                    onChange={(e) => {
-                      const newKey = e.target.value;
-                      const { [key]: oldValue, ...rest } = editingProduct.data;
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: { ...rest, [newKey]: oldValue },
-                      });
-                    }}
-                    style={{ width: "40%", marginRight: "0.5rem" }}
-                  />
-                  <input
-                    type="text"
-                    className="form-control"
-                    value={value}
-                    onChange={(e) =>
-                      setEditingProduct({
-                        ...editingProduct,
-                        data: {
-                          ...editingProduct.data,
-                          [key]: e.target.value,
-                        },
-                      })
-                    }
-                    style={{ width: "40%", marginRight: "0.5rem" }}
-                  />
-                  <button
-                    type="button"
-                    className="icon-btn icon-btn-delete"
-                    onClick={() => handleRemoveAttribute(key)}
-                    title="Remove Attribute"
-                    style={{  width: '2.25rem', height: '2.25rem', padding: '0.25rem' }}
-                  >
-                    <IoClose style={{ width: "1.5rem", height: "1.5rem", color: "#ffffff" }} />
-                  </button>
-                </div>
-              ))}
+              {Object.entries(editingProduct?.data || {}).length === 0 ? (
+                <p style={{ color: "#666", fontStyle: "italic" }}>No attributes found</p>
+              ) : (
+                Object.entries(editingProduct?.data || {}).map(([key, value], index) => (
+                  <div key={`attribute-${index}`} className="attribute-item">
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={key}
+                      onChange={(e) => {
+                        const newKey = e.target.value;
+                        const { [key]: oldValue, ...rest } = editingProduct.data;
+                        setEditingProduct({
+                          ...editingProduct,
+                          data: { ...rest, [newKey]: oldValue },
+                        });
+                      }}
+                      style={{ width: "40%", marginRight: "0.5rem" }}
+                    />
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={value}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          data: {
+                            ...editingProduct.data,
+                            [key]: e.target.value,
+                          },
+                        })
+                      }
+                      style={{ width: "40%", marginRight: "0.5rem" }}
+                    />
+                    <button
+                      type="button"
+                      className="icon-btn icon-btn-delete"
+                      onClick={() => handleRemoveAttribute(key)}
+                      title="Remove Attribute"
+                      style={{  width: '2.25rem', height: '2.25rem', padding: '0.25rem' }}
+                    >
+                      <IoClose style={{ width: "1.5rem", height: "1.5rem", color: "#ffffff" }} />
+                    </button>
+                  </div>
+                ))
+              )}
 
               {/* Add New Attribute */}
               <div className="form-row" style={{ marginTop: "1rem" }}>
